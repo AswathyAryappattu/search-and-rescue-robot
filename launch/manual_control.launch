@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- ========================================= -->
+  <!-- SAR SYSTEM WITH MANUAL CONTROL OPTION -->
+  <!-- ========================================= -->
+
+  <!-- Arguments -->
+  <arg name="world_name" default="$(find search_rescue)/worlds/disaster_site.world"/>
+  <arg name="use_rviz" default="true"/>
+  <arg name="robot_name" default="rescue_robot_1"/>
+  <arg name="x_pos" default="0.0"/>
+  <arg name="y_pos" default="0.0"/>
+  <arg name="z_pos" default="0.1"/>
+  <arg name="yaw" default="0.0"/>
+  <arg name="search_area_size" default="30.0"/>
+  <arg name="manual_control" default="false"/>  <!-- Set to true for manual control -->
+  <arg name="enable_autonomous" default="true"/>  <!-- Disable for pure manual control -->
+
+  <!-- ========================================= -->
+  <!-- GAZEBO SIMULATION -->
+  <!-- ========================================= -->
+  
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <!-- Load Robot Description -->
+  <param name="robot_description" 
+         command="$(find xacro)/xacro '$(find search_rescue)/urdf/rescue_robot.urdf.xacro'"/>
+
+  <!-- Spawn Robot in Gazebo -->
+  <node name="spawn_rescue_robot" pkg="gazebo_ros" type="spawn_model" 
+        args="-urdf -model $(arg robot_name) 
+              -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) 
+              -param robot_description" 
+        output="screen"/>
+
+  <!-- Robot State Publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <param name="publish_frequency" value="50.0"/>
+  </node>
+
+  <!-- Joint State Publisher -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="false"/>
+  </node>
+
+  <!-- ========================================= -->
+  <!-- SLAM / MAPPING -->
+  <!-- ========================================= -->
+  
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <param name="base_frame" value="base_footprint"/>
+    <param name="odom_frame" value="odom"/>
+    <param name="map_frame" value="map"/>
+    <param name="map_update_interval" value="2.0"/>
+    
+    <param name="xmin" value="-50.0"/>
+    <param name="ymin" value="-50.0"/>
+    <param name="xmax" value="50.0"/>
+    <param name="ymax" value="50.0"/>
+    <param name="delta" value="0.05"/>
+    
+    <param name="linearUpdate" value="0.5"/>
+    <param name="angularUpdate" value="0.3"/>
+    <param name="temporalUpdate" value="2.0"/>
+    <param name="particles" value="30"/>
+  </node>
+
+  <!-- ========================================= -->
+  <!-- NAVIGATION STACK (Optional for manual mode) -->
+  <!-- ========================================= -->
+
+  <group if="$(arg enable_autonomous)">
+    <!-- Move Base -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+      <rosparam file="$(find search_rescue)/config/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+      <rosparam file="$(find search_rescue)/config/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+      <rosparam file="$(find search_rescue)/config/local_costmap_params.yaml" command="load"/>
+      <rosparam file="$(find search_rescue)/config/global_costmap_params.yaml" command="load"/>
+      <rosparam file="$(find search_rescue)/config/base_local_planner_params.yaml" command="load"/>
+      <rosparam file="$(find search_rescue)/config/move_base_params.yaml" command="load"/>
+      
+      <param name="base_global_planner" value="navfn/NavfnROS"/>
+      <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+      
+      <remap from="cmd_vel" to="cmd_vel"/>
+      <remap from="odom" to="odom"/>
+      <remap from="scan" to="scan"/>
+    </node>
+
+    <!-- ========================================= -->
+    <!-- SEARCH AND RESCUE NODES -->
+    <!-- ========================================= -->
+
+    <!-- SAR Controller -->
+    <node pkg="search_rescue" type="sar_controller.py" name="sar_controller" output="screen">
+      <param name="robot_name" value="$(arg robot_name)"/>
+      <param name="search_area_size" value="$(arg search_area_size)"/>
+      <param name="detection_threshold" value="0.7"/>
+    </node>
+
+    <!-- Path Planner -->
+    <node pkg="search_rescue" type="path_planner.py" name="path_planner" output="screen">
+      <param name="planning_algorithm" value="coverage"/>
+      <param name="cell_size" value="2.0"/>
+      <param name="robot_radius" value="0.3"/>
+    </node>
+  </group>
+
+  <!-- ========================================= -->
+  <!-- DETECTION AND MONITORING (Always Active) -->
+  <!-- ========================================= -->
+
+  <!-- Victim Detector -->
+  <node pkg="search_rescue" type="victim_detector.py" name="victim_detector" output="screen">
+    <param name="confidence_threshold" value="0.6"/>
+    <param name="debug_mode" value="true"/>
+  </node>
+
+  <!-- Data Logger -->
+  <node pkg="search_rescue" type="data_logger.py" name="data_logger" output="screen">
+    <param name="log_directory" value="$(find search_rescue)/logs"/>
+    <param name="log_rate" value="10"/>
+    <param name="save_images" value="false"/>
+  </node>
+
+  <!-- Communication Relay -->
+  <node pkg="search_rescue" type="communication_relay.py" name="communication_relay" output="screen">
+    <param name="base_station_ip" value="127.0.0.1"/>
+    <param name="relay_port" value="9090"/>
+  </node>
+
+  <!-- Victim Marker Publisher -->
+  <node pkg="search_rescue" type="victim_marker_publisher.py" name="victim_marker_publisher" output="screen"/>
+
+  <!-- ========================================= -->
+  <!-- MANUAL CONTROL (Teleop) -->
+  <!-- ========================================= -->
+
+  <group if="$(arg manual_control)">
+    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen">
+      <remap from="cmd_vel" to="cmd_vel"/>
+    </node>
+  </group>
+
+  <!-- ========================================= -->
+  <!-- VISUALIZATION -->
+  <!-- ========================================= -->
+
+  <!-- RViz -->
+  <group if="$(arg use_rviz)">
+    <node name="rviz" pkg="rviz" type="rviz" 
+          args="-d $(find search_rescue)/rviz/sar_config.rviz" 
+          output="screen"/>
+  </group>
+
+</launch>

@@ -1,0 +1,5 @@
+timestamp,event_type,description
+1.6139999999999999,STATUS_UPDATE,Searching... 1/36 waypoints completed. Victims found: 0
+19.416,STATUS_UPDATE,Searching... 2/36 waypoints completed. Victims found: 0
+27.327,STATUS_UPDATE,"Potential victim at (0.33, 8.04). Awaiting confirmation."
+36.225,STATUS_UPDATE,Searching... 3/36 waypoints completed. Victims found: 0

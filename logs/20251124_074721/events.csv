@@ -1,0 +1,5 @@
+timestamp,event_type,description
+5.157,VICTIM_DETECTED,"Victim #1 at (0.00, 0.00)"
+10.231,VICTIM_DETECTED,"Victim #2 at (0.00, 0.00)"
+15.385,VICTIM_DETECTED,"Victim #3 at (0.00, 0.00)"
+20.437,VICTIM_DETECTED,"Victim #4 at (0.00, 0.00)"

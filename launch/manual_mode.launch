@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Manual Control Mode - Keyboard Only -->
+
+  <arg name="world_name" default="$(find search_rescue)/worlds/disaster_site.world"/>
+  <arg name="use_rviz" default="true"/>
+  <arg name="robot_name" default="rescue_robot_1"/>
+
+  <!-- Launch Gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+  </include>
+
+  <!-- Robot Description -->
+  <param name="robot_description" 
+         command="$(find xacro)/xacro '$(find search_rescue)/urdf/rescue_robot.urdf.xacro'"/>
+
+  <!-- Spawn Robot -->
+  <node name="spawn_rescue_robot" pkg="gazebo_ros" type="spawn_model" 
+        args="-urdf -model $(arg robot_name) -x 0 -y 0 -z 0.1 -Y 0 -param robot_description" 
+        output="screen"/>
+
+  <!-- Robot State Publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <param name="publish_frequency" value="50.0"/>
+  </node>
+
+  <!-- Victim Detector (still detects while you drive) -->
+  <node pkg="search_rescue" type="victim_detector.py" name="victim_detector" output="screen">
+    <param name="confidence_threshold" value="0.6"/>
+    <param name="debug_mode" value="true"/>
+  </node>
+
+  <!-- Victim Markers for RViz -->
+  <node pkg="search_rescue" type="victim_marker_publisher.py" name="victim_marker_publisher" output="screen"/>
+
+  <!-- Data Logger -->
+  <node pkg="search_rescue" type="data_logger.py" name="data_logger" output="screen">
+    <param name="log_directory" value="$(find search_rescue)/logs"/>
+    <param name="log_rate" value="10"/>
+  </node>
+
+  <!-- RViz -->
+  <group if="$(arg use_rviz)">
+    <node name="rviz" pkg="rviz" type="rviz" 
+          args="-d $(find search_rescue)/rviz/sar_config.rviz" 
+          output="screen"/>
+  </group>
+
+</launch>

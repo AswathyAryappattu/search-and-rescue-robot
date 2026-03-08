@@ -1,0 +1,45 @@
+{
+  "session_id": "20251124_074721",
+  "start_time": "20251124_074721",
+  "end_time": "20251124_074800",
+  "victims_found": 4,
+  "total_events": 4,
+  "victim_locations": [
+    {
+      "timestamp": 5.15,
+      "victim_id": 1,
+      "pos_x": 0.0,
+      "pos_y": 0.0,
+      "pos_z": 0.0,
+      "confidence": 0.8
+    },
+    {
+      "timestamp": 10.226,
+      "victim_id": 2,
+      "pos_x": 0.0,
+      "pos_y": 0.0,
+      "pos_z": 0.0,
+      "confidence": 0.8
+    },
+    {
+      "timestamp": 15.38,
+      "victim_id": 3,
+      "pos_x": 0.0,
+      "pos_y": 0.0,
+      "pos_z": 0.0,
+      "confidence": 0.8
+    },
+    {
+      "timestamp": 20.431,
+      "victim_id": 4,
+      "pos_x": 0.0,
+      "pos_y": 0.0,
+      "pos_z": 0.0,
+      "confidence": 0.8
+    }
+  ],
+  "mission_statistics": {
+    "odometry_samples": 0,
+    "sensor_samples": 0
+  }
+}

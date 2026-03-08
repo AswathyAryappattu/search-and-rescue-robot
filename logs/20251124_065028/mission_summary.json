@@ -1,0 +1,12 @@
+{
+  "session_id": "20251124_065028",
+  "start_time": "20251124_065028",
+  "end_time": "20251124_065046",
+  "victims_found": 0,
+  "total_events": 0,
+  "victim_locations": [],
+  "mission_statistics": {
+    "odometry_samples": 0,
+    "sensor_samples": 0
+  }
+}
