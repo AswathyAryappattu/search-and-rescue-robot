@@ -1,16 +1,16 @@
-# 🤖 Search and Rescue Robot
+#  Search and Rescue Robot
 
 An autonomous robotic system built on ROS1 that navigates disaster environments in simulation to detect and locate victims using computer vision and sensor-based perception.
 
 ---
 
-## 📌 Overview
+##  Overview
 
 This project implements a fully autonomous search and rescue robot simulated in Gazebo. The robot explores unknown environments using SLAM-based navigation while simultaneously detecting potential victims through three complementary methods: HSV color detection, optical flow-based motion tracking, and heat signature detection.
 
 ---
 
-## ✨ Features
+##  Features
 
 - Autonomous exploration of unknown environments using SLAM and LiDAR
 - Victim detection via **HSV color segmentation** (e.g. detecting skin tones or clothing colors)
@@ -22,7 +22,7 @@ This project implements a fully autonomous search and rescue robot simulated in 
 
 ---
 
-## 🛠️ System Requirements
+##  System Requirements
 
 | Requirement | Version |
 |---|---|
@@ -34,7 +34,7 @@ This project implements a fully autonomous search and rescue robot simulated in 
 
 ---
 
-## 📦 Installation
+##  Installation
 
 **1. Clone the repository into your catkin workspace:**
 ```bash
@@ -75,7 +75,7 @@ rosrun rviz rviz
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 search_rescue/
@@ -108,7 +108,7 @@ The robot uses **GMapping SLAM** with a 2D LiDAR to build an occupancy grid map 
 
 ---
 
-## 📊 Results
+##  Results
 
 - Successfully detected simulated victims in multiple Gazebo environments
 - Stable autonomous navigation with no collisions across all test runs
@@ -125,7 +125,7 @@ The robot uses **GMapping SLAM** with a 2D LiDAR to build an occupancy grid map 
 
 ---
 
-## 👩‍💻 Author
+##  Author
 
 **Aswathy A S**
 [GitHub](https://github.com/AswathyAryappattu)
